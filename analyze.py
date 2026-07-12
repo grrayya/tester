@@ -8,22 +8,26 @@ def get_data(data_file='trials.csv'):
     with open(data_file, 'r') as f:
         return list(csv.DictReader(f))
 
-def filter_stats(target_exp):
+def show_correlations():
     data = get_data()
-    # Filter by specific experiment or show all if nothing specified
-    subset = [d for d in data if d['experiment'] == target_exp] if target_exp else data
-    
-    if not subset:
-        print("No data found for that query.")
+    if not data:
+        print("No data.")
         return
 
-    # Logic to summarize performance
-    for entry in subset:
-        print(f"[{entry['timestamp'][:10]}] {entry['condition']} | Score: {entry['score']} | {entry['tag']}")
+    summary = {}
+    for entry in data:
+        tag = entry['tag']
+        if tag not in summary:
+            summary[tag] = {'scores': [], 'energies': []}
+        summary[tag]['scores'].append(int(entry['score']))
+        summary[tag]['energies'].append(int(entry['energy']))
+
+    print(f"{'Tag':<15} | {'Avg Score':<10} | {'Avg Energy':<10} | {'Count'}")
+    print("-" * 50)
+    for tag, stats in summary.items():
+        avg_score = sum(stats['scores']) / len(stats['scores'])
+        avg_energy = sum(stats['energies']) / len(stats['energies'])
+        print(f"{tag:<15} | {avg_score:<10.1f} | {avg_energy:<10.1f} | {len(stats['scores'])}")
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--exp", help="Filter by specific experiment")
-    args = parser.parse_args()
-    
-    filter_stats(args.exp)
+    show_correlations()
