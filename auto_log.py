@@ -4,10 +4,9 @@ import csv
 from pathlib import Path
 
 def get_last_commit_date():
-    # check git log for today's date
-    result = subprocess.run(['git', 'log', '-1', '--format=%cd', '--date=short'], 
-                            capture_output=True, text=True)
-    return result.stdout.strip()
+    log = subprocess.run(['git', 'log', '-1', '--format=%cd', '--date=short'],
+                          capture_output=True, text=True)
+    return log.stdout.strip()
 
 def auto_record():
     today = datetime.date.today().isoformat()
@@ -15,7 +14,6 @@ def auto_record():
         print("No commits today, skipping.")
         return
 
-    # log session automatically if commit exists
     with open('trials.csv', 'a', newline='') as f:
         writer = csv.writer(f)
         writer.writerow([
