@@ -9,18 +9,33 @@ def get_data(data_file='trials.csv'):
         return list(csv.DictReader(f))
 
 def show_correlations():
-    data = get_data()
-    if not data:
+    trials = get_data()
+    if not trials:
         print("No data.")
         return
 
     summary = {}
-    for entry in data:
-        tag = entry['tag']
+    skipped = 0
+    for trial in trials:
+        try:
+            score = int(trial['score'])
+            energy = int(trial['energy'])
+            tag = trial['tag']
+        except (KeyError, ValueError):
+            skipped += 1
+            continue
+
         if tag not in summary:
             summary[tag] = {'scores': [], 'energies': []}
-        summary[tag]['scores'].append(int(entry['score']))
-        summary[tag]['energies'].append(int(entry['energy']))
+        summary[tag]['scores'].append(score)
+        summary[tag]['energies'].append(energy)
+
+    if skipped:
+        print(f"Skipped {skipped} malformed row(s) in trials.csv")
+
+    if not summary:
+        print("No valid rows to summarize.")
+        return
 
     print(f"{'Tag':<15} | {'Avg Score':<10} | {'Avg Energy':<10} | {'Count'}")
     print("-" * 50)
